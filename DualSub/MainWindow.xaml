@@ -1,0 +1,139 @@
+﻿<Controls:MetroWindow x:Class="DualSub.MainWindow"
+        xmlns:Controls="http://metro.mahapps.com/winfx/xaml/controls"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+                       xmlns:models="clr-namespace:DualSub.Models" 
+         TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+         TextElement.FontWeight="Regular"
+         TextElement.FontSize="13"
+         TextOptions.TextFormattingMode="Ideal"
+         TextOptions.TextRenderingMode="Auto"
+         DataContext="{Binding Source={StaticResource Locator}, Path=Main}"
+         Background="{DynamicResource MaterialDesignPaper}"
+         FontFamily="{DynamicResource MaterialDesignFont}"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="1200">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="6"/>
+            <ColumnDefinition Width="350"/>
+        </Grid.ColumnDefinitions>
+        <GridSplitter Grid.Column="1" Width="6" HorizontalAlignment="Stretch" Grid.RowSpan="2"></GridSplitter>
+        <Grid Grid.Column="2" Grid.RowSpan="2" DataContext="{Binding Source={StaticResource Locator}, Path=Logger}">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <StackPanel Orientation="Horizontal">
+                <TextBlock Text="CONSOLE LOG (" Style="{StaticResource MaterialDesignSubheadingTextBlock}"/>
+                <TextBlock Text="{Binding Logs.Count}" Style="{StaticResource MaterialDesignSubheadingTextBlock}"/>
+                <TextBlock Text=")" Style="{StaticResource MaterialDesignSubheadingTextBlock}"/>
+            </StackPanel>
+
+            <ScrollViewer Grid.Row="1">
+                <ItemsControl  ItemsSource="{Binding Logs}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel>
+                                <TextBlock Text="{Binding LoggedAt}" Foreground="Gray" FontSize="11"/>
+                                <TextBlock Padding="15,0,0,0" Text="{Binding Message}" TextWrapping="Wrap" FontSize="11"/>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+        </Grid>
+        <materialDesign:Card Padding="32" Margin="16" Grid.ColumnSpan="2" MaxHeight="250">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="350"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Orientation="Vertical">
+                    <TextBlock Style="{DynamicResource MaterialDesignTitleTextBlock}">Finder</TextBlock>
+                    <TextBox Margin="0,10,0,0" materialDesign:HintAssist.Hint="Enter title" Text="{Binding Title,Mode=TwoWay}"/>
+                    <Button Width="150" Content="Search Now" HorizontalAlignment="Left" Margin="0,10,0,0" Command="{Binding SearchCommand}" CommandParameter="{Binding Title}"/>
+                </StackPanel>
+                <ScrollViewer Grid.Column="1">
+                    <ItemsControl ItemsSource="{Binding Films}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal" Margin="2">
+                                    <Button Content="Select" Command="{Binding Source={StaticResource Locator}, Path=Main.GetSubtitleListCommand}" CommandParameter="{Binding}"/>
+                                    <TextBlock Margin="10,0,0,0" VerticalAlignment="Center" Text="{Binding Title}"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+            </Grid>
+
+        </materialDesign:Card>
+        <Grid Grid.Row="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <Grid Grid.Row="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="6"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="300"/>
+                </Grid.ColumnDefinitions>
+                <GridSplitter Grid.Column="1" Background="Gray"  Width="5" HorizontalAlignment="Stretch"/>
+                <Grid Grid.Column="0">
+                    <ListView ItemsSource="{Binding TopSubtitles}" x:Name="TopSubtitlesListView">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel>
+                                    <TextBlock Text="{Binding Title}"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ListView>
+                </Grid>
+                <Grid Grid.Column="2">
+                    <ListView ItemsSource="{Binding BottomSubtitles}" x:Name="BottomSubtitlesListView">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Grid>
+                                    <TextBlock Text="{Binding Title}"/>
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ListView>
+                </Grid>
+                <materialDesign:Card VerticalContentAlignment="Center" Padding="20" Grid.Column="3" Background="#FFECECEC" VerticalAlignment="Stretch">
+                    <StackPanel>
+                        <TextBlock Text="TOP" FontSize="10"/>
+                        <TextBlock TextWrapping="Wrap" FontWeight="Bold" Text="{Binding SelectedItem.Title,ElementName=TopSubtitlesListView}"/>
+                        
+                        
+                        <TextBlock Text="BOTTOM" FontSize="10" Margin="0,30,0,0"/>
+                        <TextBlock TextWrapping="Wrap" FontWeight="Bold" Text="{Binding SelectedItem.Title,ElementName=BottomSubtitlesListView}"/>
+
+                        <Button Content="Convert Now" Width="150"  Margin="0,10,0,0" Command="{Binding ConvertToDualSubtitleCommand}">
+                            <Button.CommandParameter>
+                                <MultiBinding Converter="{StaticResource MultiValueConverter}">
+                                    <Binding Path="SelectedItem" ElementName="TopSubtitlesListView"/>
+                                    <Binding Path="SelectedItem" ElementName="BottomSubtitlesListView"/>
+                                </MultiBinding>
+                            </Button.CommandParameter>
+                        </Button>
+                    </StackPanel>
+                </materialDesign:Card>
+            </Grid>
+        </Grid>
+    </Grid>
+</Controls:MetroWindow>
