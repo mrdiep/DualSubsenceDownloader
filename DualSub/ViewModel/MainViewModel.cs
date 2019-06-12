@@ -45,14 +45,20 @@ namespace DualSub.ViewModel
 
         private async Task ConvertToDualSubtitleCommandImplement(object x)
         {
+            Logger.AddLog("Start Convert");
             var arr = (object[])x;
             var topSubtitle = (SubtitleMetadata)arr[0];
             var bottomSubtitle = (SubtitleMetadata)arr[1];
 
+            Logger.AddLog("Start download top subtitle");
             var topContent = await SubsenceService.DownloadContent(topSubtitle.Href);
+
+            Logger.AddLog("Start download bottom subtitle");
             var bottomContent = await SubsenceService.DownloadContent(bottomSubtitle.Href);
 
-            AssSubtitleService.CreateDualSub(topContent, bottomContent);
+            Logger.AddLog("Start create subtitle from 2 list");
+            AssSubtitleService.CreateDualSub(topContent, bottomContent, Title);
+            Logger.AddLog("Complete Convert");
         }
 
         private async Task GetSubtitleListCommandImplement(FilmMetadata film)
