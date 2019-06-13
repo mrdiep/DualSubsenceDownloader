@@ -4,7 +4,6 @@ using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Command;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Input;
@@ -31,6 +30,8 @@ namespace DualSub.ViewModel
         private string filterTopLanguage = "ENGLISH";
         private string filterBottomLanguage = "VIETNAMESE";
         private string isCreateSubtitle;
+        private bool isInCreateSubtitles;
+        private string fileFilm;
 
         public MainViewModel(SubsenceService subsenceService, LoggerViewModel loggerViewModel, AssSubtitleService assSubtitleService)
         {
@@ -39,7 +40,14 @@ namespace DualSub.ViewModel
             AssSubtitleService = assSubtitleService;
         }
 
-        public string Title { get => title; set => Set(ref title, value); }
+        public string Title
+        {
+            get => title; set
+            {
+                Set(ref title, value); FileFilm = string.Empty;
+            }
+        }
+
         public string Tags
         {
             get => tags; set
@@ -69,6 +77,8 @@ namespace DualSub.ViewModel
         public IEnumerable<SubtitleMetadata> BottomSubtitles { get => bottomSubtitles; set => Set(ref bottomSubtitles, value); }
 
         public string CreateSubtitleStatus { get => isCreateSubtitle; set => Set(ref isCreateSubtitle, value); }
+        public bool IsInCreateSubtitles { get => isInCreateSubtitles; set => Set(ref isInCreateSubtitles, value); }
+
         public string FilterTopLanguage
         {
             get => filterTopLanguage; set
@@ -99,10 +109,12 @@ namespace DualSub.ViewModel
         public ICommand SearchCommand { get => searchCommand ?? (searchCommand = new RelayCommand<string>(async (x) => await SearchCommandImplment((string)x))); }
         public ICommand GetSubtitleListCommand { get => getSubtitleListCommand ?? (getSubtitleListCommand = new RelayCommand<FilmMetadata>(async x => await GetSubtitleListCommandImplement(x))); }
         public ICommand ConvertToDualSubtitleCommand { get => convertToDualSubtitleCommand ?? (convertToDualSubtitleCommand = new RelayCommand<object>(async x => await ConvertToDualSubtitleCommandImplement(x))); }
+        public string FileFilm { get => fileFilm; set => Set(ref fileFilm, value); }
 
         private async Task ConvertToDualSubtitleCommandImplement(object x)
         {
             CreateSubtitleStatus = "Start Convert...";
+            IsInCreateSubtitles = true;
             try
             {
                 Logger.AddLog("Start Convert");
@@ -124,9 +136,14 @@ namespace DualSub.ViewModel
                 Logger.AddLog("Complete Convert");
                 CreateSubtitleStatus = "Merging completed. \r\nDrop film here to get merged subtitle.";
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
+                Logger.AddError(ex.Message);
                 CreateSubtitleStatus = "Merge failed";
+            }
+            finally
+            {
+                IsInCreateSubtitles = false;
             }
         }
 

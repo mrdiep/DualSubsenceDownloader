@@ -58,7 +58,7 @@ namespace DualSub.Services
             }
             catch (Exception ex)
             {
-                Logger.AddLog(ex.Message);
+                Logger.AddError(ex.Message);
             }
         }
 
