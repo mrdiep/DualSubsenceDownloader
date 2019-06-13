@@ -62,7 +62,6 @@ namespace DualSub.Services
                 var list = htmlDocument
                     .QuerySelectorAll(".content table td a[href^=/subtitles]")
                     .Select(x => new SubtitleMetadata { Href  =x.Attributes["href"].Value, Language = x.QuerySelector("span:nth-child(1)").InnerText.Trim(), Title =  x.QuerySelector("span:nth-child(2)").InnerText.Trim()})
-                    .Where(x => x.Language.ToUpper() == "VIETNAMESE" || x.Language.ToUpper() == "ENGLISH")
                     .ToList();
 
                 return list;
@@ -74,6 +73,8 @@ namespace DualSub.Services
 
             return null;
         }
+
+        
 
         public async Task<IEnumerable<SubtitleItem>> DownloadContent(string url)
         {

@@ -5,7 +5,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
-                       xmlns:models="clr-namespace:DualSub.Models" 
+         xmlns:models="clr-namespace:DualSub.Models" 
          TextElement.Foreground="{DynamicResource MaterialDesignBody}"
          TextElement.FontWeight="Regular"
          TextElement.FontSize="13"
@@ -76,15 +76,17 @@
                     </ItemsControl>
                 </ScrollViewer>
             </Grid>
-
         </materialDesign:Card>
         <Grid Grid.Row="1">
             <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
-
-            <Grid Grid.Row="0">
+            <Grid Grid.Row="0" Margin="5">
+                <TextBox materialDesign:HintAssist.Hint="Enter Tags for searching" Text="{Binding Tags,Mode=TwoWay}"/>
+            </Grid>
+            <Grid Grid.Row="1">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="6"/>
@@ -93,7 +95,8 @@
                 </Grid.ColumnDefinitions>
                 <GridSplitter Grid.Column="1" Background="Gray"  Width="5" HorizontalAlignment="Stretch"/>
                 <Grid Grid.Column="0">
-                    <ListView ItemsSource="{Binding TopSubtitles}" x:Name="TopSubtitlesListView">
+                    <ComboBox IsSynchronizedWithCurrentItem="True" SelectedItem="{Binding FilterTopLanguage, Mode=TwoWay}" ItemsSource="{Binding Subtitles, Converter={StaticResource GetDistinctLanguageConverter}, ConverterParameter='ENGLISH'}" VerticalAlignment="Top" />
+                    <ListView ItemsSource="{Binding TopSubtitles}" x:Name="TopSubtitlesListView" Margin="0,30,0,0">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
                                 <StackPanel>
@@ -102,9 +105,16 @@
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ListView>
+                    <TextBlock Text="No Subtitles" Visibility="{Binding TopSubtitles, Converter={StaticResource ListEmptyToVisibleConverter}}" 
+                               HorizontalAlignment="Center" VerticalAlignment="Center"/>
                 </Grid>
                 <Grid Grid.Column="2">
-                    <ListView ItemsSource="{Binding BottomSubtitles}" x:Name="BottomSubtitlesListView">
+                    <ComboBox 
+                            IsSynchronizedWithCurrentItem="True"
+                            SelectedItem="{Binding FilterBottomLanguage, Mode=TwoWay}"
+                            ItemsSource="{Binding Subtitles, Converter={StaticResource GetDistinctLanguageConverter}, ConverterParameter='VIETNAMESE'}"
+                            VerticalAlignment="Top" />
+                    <ListView ItemsSource="{Binding BottomSubtitles}" x:Name="BottomSubtitlesListView" Margin="0,30,0,0">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
                                 <Grid>
@@ -113,30 +123,35 @@
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ListView>
+                    <TextBlock Text="No Subtitles" Visibility="{Binding BottomSubtitles, Converter={StaticResource ListEmptyToVisibleConverter}}" 
+                               HorizontalAlignment="Center" VerticalAlignment="Center"/>
                 </Grid>
                 <materialDesign:Card VerticalContentAlignment="Center" Padding="20" Grid.Column="3" Background="#FFECECEC" VerticalAlignment="Stretch">
                     <StackPanel>
-                        <TextBlock Text="TOP" FontSize="10"/>
+                        <TextBlock Text="TOP" FontSize="10" Visibility="{Binding SelectedItem,ElementName=TopSubtitlesListView,Converter={StaticResource NullToCollapsedConverter}}"/>
                         <TextBlock TextWrapping="Wrap" FontWeight="Bold" Text="{Binding SelectedItem.Title,ElementName=TopSubtitlesListView}"/>
-                        
-                        
-                        <TextBlock Text="BOTTOM" FontSize="10" Margin="0,30,0,0"/>
+                        <TextBlock Text="BOTTOM" FontSize="10" Margin="0,30,0,0" Visibility="{Binding SelectedItem,ElementName=TopSubtitlesListView,Converter={StaticResource NullToCollapsedConverter}}"/>
                         <TextBlock TextWrapping="Wrap" FontWeight="Bold" Text="{Binding SelectedItem.Title,ElementName=BottomSubtitlesListView}"/>
-                        
-                        <Button  AllowDrop="True"  Content="Convert Now" Width="150"  Margin="0,10,0,0" Command="{Binding ConvertToDualSubtitleCommand}">
-                            <Button.CommandParameter>
-                                <MultiBinding Converter="{StaticResource MultiValueConverter}">
+                        <StackPanel>
+                            <StackPanel.Visibility>
+                                <MultiBinding Converter="{StaticResource AllNotNullToVisibilityConverter}">
                                     <Binding Path="SelectedItem" ElementName="TopSubtitlesListView"/>
                                     <Binding Path="SelectedItem" ElementName="BottomSubtitlesListView"/>
                                 </MultiBinding>
-                            </Button.CommandParameter>
-                        </Button>
+                            </StackPanel.Visibility>
+                            <Button  AllowDrop="True"  Content="Convert Now" Width="150"  Margin="0,10,0,0" Command="{Binding ConvertToDualSubtitleCommand}">
+                                <Button.CommandParameter>
+                                    <MultiBinding Converter="{StaticResource MultiValueConverter}">
+                                        <Binding Path="SelectedItem" ElementName="TopSubtitlesListView"/>
+                                        <Binding Path="SelectedItem" ElementName="BottomSubtitlesListView"/>
+                                    </MultiBinding>
+                                </Button.CommandParameter>
+                            </Button>
 
-                        <Border AllowDrop="True" Drop="FilmFile_Drop" Width="250" Height="120" BorderBrush="#FF1D1B1B" BorderThickness="2">
-                            <TextBlock Text="Drag film here to download the .ass file" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-
-                        </Border>
-                        
+                            <Border Margin="5,15,5,5" AllowDrop="{Binding CreateSubtitleStatus, Converter={StaticResource StringEqualsToBoolConverter}, ConverterParameter='Merging completed. \r\nDrop film here to get merged subtitle.'}" Drop="FilmFile_Drop" Width="250" Height="120" BorderBrush="#551D1B1B" BorderThickness="1">
+                                <TextBlock Text="{Binding CreateSubtitleStatus}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                        </StackPanel>
                     </StackPanel>
                 </materialDesign:Card>
             </Grid>
