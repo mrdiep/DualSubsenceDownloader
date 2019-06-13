@@ -16,9 +16,9 @@ namespace DualSub.ViewModel
         public SubsenceService SubsenceService { get; }
         public LoggerViewModel Logger { get; }
         public AssSubtitleService AssSubtitleService { get; }
+        public SettingViewModel Setting { get; }
 
         private string title = "The incredibles 1";
-        private string tags = "264 1080p";
 
         private ICommand searchCommand;
         private IEnumerable<FilmMetadata> films;
@@ -33,11 +33,14 @@ namespace DualSub.ViewModel
         private bool isInCreateSubtitles;
         private string fileFilm;
 
-        public MainViewModel(SubsenceService subsenceService, LoggerViewModel loggerViewModel, AssSubtitleService assSubtitleService)
+        public MainViewModel(SubsenceService subsenceService, LoggerViewModel loggerViewModel, AssSubtitleService assSubtitleService, SettingViewModel settingViewModel)
         {
             SubsenceService = subsenceService;
             Logger = loggerViewModel;
             AssSubtitleService = assSubtitleService;
+            Setting = settingViewModel;
+            Setting.SubcribeChanged((x) => FilterNow());
+
         }
 
         public string Title
@@ -48,16 +51,11 @@ namespace DualSub.ViewModel
             }
         }
 
-        public string Tags
+        private void FilterNow()
         {
-            get => tags; set
-            {
-                Set(ref tags, value);
-
-                var filters = Tags.ToLower().Split(new[] { ";", ",", " " }, StringSplitOptions.RemoveEmptyEntries);
-                TopSubtitles = subtitles.Where(x => x.Language.ToUpper() == FilterTopLanguage).Where(x => !filters.Any() || ContainsList(x.Title.ToLower(), filters));
-                BottomSubtitles = subtitles.Where(x => x.Language.ToUpper() == FilterBottomLanguage).Where(x => !filters.Any() || ContainsList(x.Title.ToLower(), filters));
-            }
+            var filters = Setting.TagsFilter.ToLower().Split(new[] { ";", ",", " " }, StringSplitOptions.RemoveEmptyEntries);
+            TopSubtitles = subtitles.Where(x => x.Language.ToUpper() == FilterTopLanguage).Where(x => !filters.Any() || ContainsList(x.Title.ToLower(), filters));
+            BottomSubtitles = subtitles.Where(x => x.Language.ToUpper() == FilterBottomLanguage).Where(x => !filters.Any() || ContainsList(x.Title.ToLower(), filters));
         }
 
         private bool ContainsList(string value, string[] filters)
@@ -87,8 +85,7 @@ namespace DualSub.ViewModel
                 if (Subtitles == null || !Subtitles.Any())
                     return;
 
-                var filters = Tags.ToLower().Split(new[] { ";", ",", " " }, StringSplitOptions.RemoveEmptyEntries);
-                TopSubtitles = Subtitles.Where(x => x.Language.ToUpper() == FilterTopLanguage).Where(x => !Tags.Any() || ContainsList(x.Title.ToLower(), filters));
+                FilterNow();
             }
         }
         public string FilterBottomLanguage
@@ -100,8 +97,7 @@ namespace DualSub.ViewModel
                 if (Subtitles == null || !Subtitles.Any())
                     return;
 
-                var filters = Tags.ToLower().Split(new[] { ";", ",", " " }, StringSplitOptions.RemoveEmptyEntries);
-                BottomSubtitles = Subtitles.Where(x => x.Language.ToUpper() == FilterBottomLanguage).Where(x => !Tags.Any() || ContainsList(x.Title.ToLower(), filters));
+                FilterNow();
             }
         }
 
@@ -110,6 +106,8 @@ namespace DualSub.ViewModel
         public ICommand GetSubtitleListCommand { get => getSubtitleListCommand ?? (getSubtitleListCommand = new RelayCommand<FilmMetadata>(async x => await GetSubtitleListCommandImplement(x))); }
         public ICommand ConvertToDualSubtitleCommand { get => convertToDualSubtitleCommand ?? (convertToDualSubtitleCommand = new RelayCommand<object>(async x => await ConvertToDualSubtitleCommandImplement(x))); }
         public string FileFilm { get => fileFilm; set => Set(ref fileFilm, value); }
+
+       
 
         private async Task ConvertToDualSubtitleCommandImplement(object x)
         {
@@ -132,7 +130,7 @@ namespace DualSub.ViewModel
 
                 Logger.AddLog("Start create subtitle from 2 list");
                 CreateSubtitleStatus = "merging 2 subtitles...";
-                AssSubtitleService.CreateDualSub(topContent, bottomContent, Title);
+                AssSubtitleService.CreateDualSub(topContent, bottomContent, Title, Setting);
                 Logger.AddLog("Complete Convert");
                 CreateSubtitleStatus = "Merging completed. \r\nDrop film here to get merged subtitle.";
             }
@@ -161,7 +159,7 @@ namespace DualSub.ViewModel
             filterTopLanguage = keepFilterTop;
             filterBottomLanguage = keepFilterBottom;
 
-            Tags = Tags;
+            FilterNow();
 
             Logger.AddLog("Complete search subtitle for " + film.Title);
             RaisePropertyChanged("FilterTopLanguage");

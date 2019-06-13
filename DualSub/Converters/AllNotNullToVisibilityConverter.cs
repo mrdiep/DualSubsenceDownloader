@@ -37,16 +37,16 @@ namespace DualSub.Converters
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            //if (value == null)
-            //    return Visibility.Visible;
+            if (value == null)
+                return Visibility.Visible;
 
-            //var e =(IEnumerable)value;
-            //var enumerable = e.GetEnumerator();
-            //if (!enumerable.MoveNext())
-            //{
+            var e = (IEnumerable)value;
+            var enumerable = e.GetEnumerator();
+            if (!enumerable.MoveNext())
+            {
 
-            //    return Visibility.Visible;
-            //}
+                return Visibility.Visible;
+            }
 
             //enumerable.Reset();
             return  Visibility.Collapsed;

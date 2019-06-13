@@ -1,6 +1,9 @@
 using GalaSoft.MvvmLight.Ioc;
 using CommonServiceLocator;
 using DualSub.Services;
+using Newtonsoft.Json;
+using System.IO;
+using System;
 
 namespace DualSub.ViewModel
 {
@@ -14,6 +17,7 @@ namespace DualSub.ViewModel
             SimpleIoc.Default.Register<LoggerViewModel>();
             SimpleIoc.Default.Register<SubsenceService>();
             SimpleIoc.Default.Register<AssSubtitleService>();
+            SimpleIoc.Default.Register<SettingViewModel>(() => JsonConvert.DeserializeObject<SettingViewModel>(File.ReadAllText("setting.json")));
 
             Logger.AddLog("Application Started");
         }
@@ -23,6 +27,13 @@ namespace DualSub.ViewModel
             get
             {
                 return ServiceLocator.Current.GetInstance<MainViewModel>();
+            }
+        }
+        public SettingViewModel Setting
+        {
+            get
+            {
+                return ServiceLocator.Current.GetInstance<SettingViewModel>();
             }
         }
 

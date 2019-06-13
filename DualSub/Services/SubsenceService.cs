@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
@@ -27,10 +28,11 @@ namespace DualSub.Services
         {
             try
             {
-                var content = await "https://subscene.com/subtitles/searchbytitle".PostMultipartAsync(x =>
-                    x.AddString("query", filmTitle)
+                var content = await "https://subscene.com/subtitles/searchbytitle"
+                    .PostMultipartAsync(x => x
+                    .AddString("query", filmTitle)
                     .AddString("l", "")
-                    .AddString("g-recaptcha-response", "03AOLTBLQ-ehT2q33gENO3ckDtDQtdPuevceGUNyQ-82yYlQ1QnutsZ529GHjRllrUYLP180ek5e-1iXw3Xs4VU8cEx2HAf4JmuxL7Kyuz6ZBl4Hqknr-nNsqXeZjN-B0ztqgtBwGfb1nq_0q0pyBc9Mxkc3cfR6hhZePacLjSfOvfoQqtHG9BBbszlFHGJh_6hB6xt7malvG-QCD5X7SwfQ-DSstNQADGMC-EYan9uX2VuG-NQHbLe_hW9TlwkMdeaqGKjjFgYQyVNY92CkM8hz_Py05zel6aoihAYJyAQCXc7ZT1T0y9B21GPbtZ-UYpOKjuR4msD7Vd")
+                    .AddString("g-recaptcha-response", ConfigurationManager.AppSettings["subsence-recaptcha-response"])
                 ).ReceiveString();
 
                 var document = new HtmlDocument();

@@ -53,23 +53,23 @@
                 </ScrollViewer>
             </Grid>
         </materialDesign:Card>
-        
+
         <materialDesign:Card Padding="32" Margin="10" Grid.ColumnSpan="2" MaxHeight="250">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="350"/>
                 </Grid.ColumnDefinitions>
-                <StackPanel Orientation="Vertical">
+                <StackPanel Orientation="Vertical"
+                            AllowDrop="True"
+                             Drop="FilmFileInfo_Drop">
                     <TextBlock Style="{DynamicResource MaterialDesignTitleTextBlock}">Finder</TextBlock>
+                    <TextBlock Text="Enter title film or drag video here." Margin="0,15,0,0"/>
                     <TextBox Margin="0,10,0,0"
                              materialDesign:HintAssist.Hint="Enter title"
                              Text="{Binding Title, Mode=TwoWay}"
-                             AllowDrop="True"
-                             Drop="FilmFileInfo_Drop"/>
-                    <Button Width="150" Content="Search Now"
-                            AllowDrop="True"
-                             Drop="FilmFileInfo_Drop" HorizontalAlignment="Left" Margin="0,10,0,0"
+                             />
+                    <Button Width="150" Content="Search Now" HorizontalAlignment="Left" Margin="0,10,0,0"
                             Command="{Binding SearchCommand}" CommandParameter="{Binding Title}"/>
                 </StackPanel>
                 <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Auto">
@@ -88,12 +88,12 @@
                     <TextBlock Text="User action is locked." HorizontalAlignment="Center" VerticalAlignment="Center"  Padding="20" Background="White" Foreground="Black"/>
                 </Border>
             </Grid>
-          
+
         </materialDesign:Card>
         <Grid Grid.Row="1">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="300"/>
+                <ColumnDefinition Width="350"/>
             </Grid.ColumnDefinitions>
 
             <materialDesign:Card VerticalAlignment="Stretch" Padding="10" Margin="10,0,10,10">
@@ -109,11 +109,11 @@
                     </Grid.RowDefinitions>
                     <GridSplitter Grid.Column="1" Grid.Row="1" Background="Gray"  Width="5" HorizontalAlignment="Stretch"/>
                     <Grid Margin="5" Grid.ColumnSpan="3">
-                        <TextBox materialDesign:HintAssist.Hint="Enter Tags for searching" Text="{Binding Tags,Mode=TwoWay}"/>
+                        <TextBox materialDesign:HintAssist.Hint="Enter Tags for searching" Text="{Binding Setting.TagsFilter, Mode=TwoWay, Source={StaticResource Locator}}"/>
                     </Grid>
                     <Grid Grid.Column="0" Grid.Row="1" Margin="3">
                         <ComboBox IsSynchronizedWithCurrentItem="True" SelectedItem="{Binding FilterTopLanguage, Mode=TwoWay}" ItemsSource="{Binding Subtitles, Converter={StaticResource GetDistinctLanguageConverter}, ConverterParameter='ENGLISH'}" VerticalAlignment="Top" />
-                    
+
                         <ListView ItemsSource="{Binding TopSubtitles}" x:Name="TopSubtitlesListView" Margin="0,30,0,0">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
@@ -151,34 +151,61 @@
                 </Grid>
             </materialDesign:Card>
             <materialDesign:Card VerticalContentAlignment="Center" Grid.Column="1" VerticalAlignment="Stretch" Margin="0,0,5,10" Padding="10">
-                <StackPanel>
-                    <TextBlock Text="TOP" FontSize="10" Visibility="{Binding SelectedItem,ElementName=TopSubtitlesListView,Converter={StaticResource NullToCollapsedConverter}}"/>
-                    <TextBlock TextWrapping="Wrap" FontWeight="Bold" Text="{Binding SelectedItem.Title,ElementName=TopSubtitlesListView}"/>
-                    <TextBlock Text="BOTTOM" FontSize="10" Margin="0,30,0,0" Visibility="{Binding SelectedItem,ElementName=TopSubtitlesListView,Converter={StaticResource NullToCollapsedConverter}}"/>
-                    <TextBlock TextWrapping="Wrap" FontWeight="Bold" Text="{Binding SelectedItem.Title,ElementName=BottomSubtitlesListView}"/>
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="0,0,10,0">
                     <StackPanel>
-                        <StackPanel.Visibility>
-                            <MultiBinding Converter="{StaticResource AllNotNullToVisibilityConverter}">
-                                <Binding Path="SelectedItem" ElementName="TopSubtitlesListView"/>
-                                <Binding Path="SelectedItem" ElementName="BottomSubtitlesListView"/>
-                            </MultiBinding>
-                        </StackPanel.Visibility>
-                        <Button  AllowDrop="True" Visibility="{Binding IsInCreateSubtitles, Converter={StaticResource TrueBoolToCollapsedConverter}}"  Content="Convert Now" Width="150"  Margin="0,10,0,0" Command="{Binding ConvertToDualSubtitleCommand}">
-                            <Button.CommandParameter>
-                                <MultiBinding Converter="{StaticResource MultiValueConverter}">
+                        <TextBlock Text="SELECTED TOP SUBTITLE" FontSize="10" Visibility="{Binding SelectedItem,ElementName=TopSubtitlesListView,Converter={StaticResource NullToCollapsedConverter}}"/>
+                        <TextBlock TextWrapping="Wrap" FontWeight="Bold" Text="{Binding SelectedItem.Title,ElementName=TopSubtitlesListView}"/>
+                        <TextBlock Text="SELECTED BOTTOM SUBTITLE" FontSize="10" Margin="0,5,0,0" Visibility="{Binding SelectedItem,ElementName=TopSubtitlesListView,Converter={StaticResource NullToCollapsedConverter}}"/>
+                        <TextBlock TextWrapping="Wrap" FontWeight="Bold" Text="{Binding SelectedItem.Title,ElementName=BottomSubtitlesListView}"/>
+
+                        <StackPanel>
+                            <StackPanel.Visibility>
+                                <MultiBinding Converter="{StaticResource AllNotNullToVisibilityConverter}">
                                     <Binding Path="SelectedItem" ElementName="TopSubtitlesListView"/>
                                     <Binding Path="SelectedItem" ElementName="BottomSubtitlesListView"/>
                                 </MultiBinding>
-                            </Button.CommandParameter>
-                        </Button>
+                            </StackPanel.Visibility>
+                            <Expander Background="{x:Null}" Header="Font Settings" IsExpanded="False">
+                                <StackPanel DataContext="{Binding Source={StaticResource Locator}, Path=Setting}">
+                                    <TextBlock Text="TOP FONT SETTINGS"  Margin="0,5,0,0" FontWeight="Bold"/>
+                                    <StackPanel Margin="15,0,0,0">
+                                        <TextBlock Text="Size" FontStyle="Italic" FontSize="12" Margin="0,3,0,0"/>
+                                        <TextBox Text="{Binding TopFontSize, Mode=TwoWay}"/>
+                                        <TextBlock Text="Color" FontStyle="Italic" FontSize="12" Margin="0,3,0,0"/>
+                                        <TextBox Text="{Binding TopFontColor, Mode=TwoWay}"/>
+                                        <TextBlock Text="Outline" FontStyle="Italic" FontSize="12" Margin="0,3,0,0"/>
+                                        <TextBox Text="{Binding TopFontColorOutline, Mode=TwoWay}"/>
+                                    </StackPanel>
+                                    <TextBlock Text="BOTTOM FONT SETTINGS" FontWeight="Bold" Margin="0,5,0,0"/>
+                                    <StackPanel Margin="15,0,0,0">
+                                        <TextBlock Text="Size" FontStyle="Italic" FontSize="12" Margin="0,3,0,0"/>
+                                        <TextBox Text="{Binding BottomFontSize, Mode=TwoWay}"/>
+                                        <TextBlock Text="Color" FontStyle="Italic" FontSize="12" Margin="0,3,0,0"/>
+                                        <TextBox Text="{Binding BottomFontColor, Mode=TwoWay}"/>
+                                        <TextBlock Text="Outline" FontStyle="Italic" FontSize="12" Margin="0,3,0,0"/>
+                                        <TextBox Text="{Binding BottomFontColorOutline, Mode=TwoWay}"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Expander>
+                            <Button  AllowDrop="True"
+                                     Visibility="{Binding IsInCreateSubtitles, Converter={StaticResource TrueBoolToCollapsedConverter}}" 
+                                     Content="Convert Now" Width="150"  Margin="0,10,0,0" Command="{Binding ConvertToDualSubtitleCommand}">
+                                <Button.CommandParameter>
+                                    <MultiBinding Converter="{StaticResource MultiValueConverter}">
+                                        <Binding Path="SelectedItem" ElementName="TopSubtitlesListView"/>
+                                        <Binding Path="SelectedItem" ElementName="BottomSubtitlesListView"/>
+                                    </MultiBinding>
+                                </Button.CommandParameter>
+                            </Button>
 
-                        <Border Margin="5,15,5,5" 
-                                    AllowDrop="{Binding CreateSubtitleStatus, Converter={StaticResource StringEqualsToBoolConverter}, ConverterParameter='Merging completed. \r\nDrop film here to get merged subtitle.'}"
-                                    Drop="FilmFile_Drop" Width="250" Height="120" BorderBrush="#551D1B1B" BorderThickness="1">
-                            <TextBlock Text="{Binding CreateSubtitleStatus}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
+                            <Border Margin="5,15,5,5" 
+                                        AllowDrop="True"
+                                        Drop="FilmFile_Drop" Width="250" Height="120" BorderBrush="#551D1B1B" BorderThickness="1">
+                                <TextBlock Text="{Binding CreateSubtitleStatus}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                        </StackPanel>
                     </StackPanel>
-                </StackPanel>
+                </ScrollViewer>
             </materialDesign:Card>
         </Grid>
     </Grid>

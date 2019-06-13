@@ -29,11 +29,18 @@ namespace DualSub.Services
             public Position PositionAt { get; set; }
         }
 
-        public void CreateDualSub(IEnumerable<SubtitleItem> topContent, IEnumerable<SubtitleItem> bottomContent, string title)
+        public void CreateDualSub(IEnumerable<SubtitleItem> topContent, IEnumerable<SubtitleItem> bottomContent, string title, SettingViewModel settingViewModel)
         {
             try
             {
-                var template = File.ReadAllText(@"temp\ASS-TEMPLATE.txt");
+                var template = File.ReadAllText(@"temp\ASS-TEMPLATE.txt")
+                    .Replace("TopFontsize", settingViewModel.TopFontSize)
+                    .Replace("TopPrimaryColour", settingViewModel.TopFontColor)
+                    .Replace("TopOutlineColour", settingViewModel.TopFontColorOutline)
+                    .Replace("BotFontsize", settingViewModel.TopFontSize)
+                    .Replace("BotPrimaryColour", settingViewModel.BottomFontColor)
+                    .Replace("BotOutlineColour", settingViewModel.BottomFontColorOutline);
+
                 var allSubtitle = topContent.Select(x => new DualSubtitleItem
                 {
                     EndTime = x.EndTime,
