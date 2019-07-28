@@ -261,15 +261,26 @@
     <Compile Include="Converters\AllNotNullToVisibilityConverter.cs" />
     <Compile Include="Converters\GetDistinctLanguage.cs" />
     <Compile Include="Converters\MultiValueConverter.cs" />
+    <Compile Include="FilmExplorer.xaml.cs">
+      <DependentUpon>FilmExplorer.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Models\FilmMetadata.cs" />
+    <Compile Include="Models\PlexData.cs" />
     <Compile Include="Models\SubtitleItem.cs" />
     <Compile Include="Services\AssSubtitleService.cs" />
+    <Compile Include="Services\PlexXmlService.cs" />
     <Compile Include="Services\SubsenceService.cs" />
     <Compile Include="Models\SubtitleMetadata.cs" />
     <Compile Include="ViewModel\LoggerViewModel.cs" />
+    <Compile Include="Services\PlexDataMapperService.cs" />
+    <Compile Include="ViewModel\PlexExplorerViewModel.cs" />
     <Compile Include="ViewModel\MainViewModel.cs" />
     <Compile Include="ViewModel\SettingViewModel.cs" />
     <Compile Include="ViewModel\ViewModelLocator.cs" />
+    <Page Include="FilmExplorer.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

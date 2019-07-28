@@ -78,7 +78,7 @@ namespace DualSub.Services
 
         
 
-        public async Task<IEnumerable<SubtitleItem>> DownloadContent(string url)
+        public async Task<IEnumerable<SubtitleItem>> DownloadContent(string url, string saveAsName)
         {
             try
             {
@@ -97,10 +97,10 @@ namespace DualSub.Services
                     {
                         if (entry.FullName.EndsWith(".srt", StringComparison.OrdinalIgnoreCase))
                         {
-                           entry.ExtractToFile(Path.Combine("temp", "subtitle.text"), true);
+                           entry.ExtractToFile(Path.Combine("temp", saveAsName), true);
 
                             var parser = new SrtParser();
-                            using (var fileStream = File.OpenRead(@"temp\subtitle.text"))
+                            using (var fileStream = File.OpenRead(@"temp\" + saveAsName))
                             {
                                 var items = parser.ParseStream(fileStream, Encoding.UTF8);
 

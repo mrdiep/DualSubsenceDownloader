@@ -12,7 +12,6 @@ namespace DualSub.ViewModel
 {
     public class MainViewModel : ViewModelBase
     {
-
         public SubsenceService SubsenceService { get; }
         public LoggerViewModel Logger { get; }
         public AssSubtitleService AssSubtitleService { get; }
@@ -32,6 +31,7 @@ namespace DualSub.ViewModel
         private string isCreateSubtitle;
         private bool isInCreateSubtitles;
         private string fileFilm;
+        private string _year = "2004";
 
         public MainViewModel(SubsenceService subsenceService, LoggerViewModel loggerViewModel, AssSubtitleService assSubtitleService, SettingViewModel settingViewModel)
         {
@@ -49,6 +49,11 @@ namespace DualSub.ViewModel
             {
                 Set(ref title, value); FileFilm = string.Empty;
             }
+        }
+
+        public string Year {
+            get => _year;
+            set => Set(ref _year, value);
         }
 
         private void FilterNow()
@@ -107,7 +112,7 @@ namespace DualSub.ViewModel
         public ICommand ConvertToDualSubtitleCommand { get => convertToDualSubtitleCommand ?? (convertToDualSubtitleCommand = new RelayCommand<object>(async x => await ConvertToDualSubtitleCommandImplement(x))); }
         public string FileFilm { get => fileFilm; set => Set(ref fileFilm, value); }
 
-       
+
 
         private async Task ConvertToDualSubtitleCommandImplement(object x)
         {
@@ -122,11 +127,11 @@ namespace DualSub.ViewModel
 
                 Logger.AddLog("Start download top subtitle");
                 CreateSubtitleStatus = "downloading top subtitle...";
-                var topContent = await SubsenceService.DownloadContent(topSubtitle.Href);
+                var topContent = await SubsenceService.DownloadContent(topSubtitle.Href, "top.srt");
 
                 Logger.AddLog("Start download bottom subtitle");
                 CreateSubtitleStatus = "downloading bottom subtitle...";
-                var bottomContent = await SubsenceService.DownloadContent(bottomSubtitle.Href);
+                var bottomContent = await SubsenceService.DownloadContent(bottomSubtitle.Href, "bottom.srt");
 
                 Logger.AddLog("Start create subtitle from 2 list");
                 CreateSubtitleStatus = "merging 2 subtitles...";
@@ -176,7 +181,7 @@ namespace DualSub.ViewModel
             TopSubtitles = Enumerable.Empty<SubtitleMetadata>();
             BottomSubtitles = Enumerable.Empty<SubtitleMetadata>();
 
-            Films = await SubsenceService.SearchFilms(title);
+            Films = (await SubsenceService.SearchFilms(title)).Where(x => string.IsNullOrWhiteSpace(Year) || x.Title.Contains(Year));
             Logger.AddLog("Complete search film" + title);
         }
     }

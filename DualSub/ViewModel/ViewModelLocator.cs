@@ -17,6 +17,9 @@ namespace DualSub.ViewModel
             SimpleIoc.Default.Register<LoggerViewModel>();
             SimpleIoc.Default.Register<SubsenceService>();
             SimpleIoc.Default.Register<AssSubtitleService>();
+            SimpleIoc.Default.Register<PlexDataMapperService>();
+            SimpleIoc.Default.Register<PlexXmlService>();
+            SimpleIoc.Default.Register<PlexExplorerViewModel>();
             SimpleIoc.Default.Register<SettingViewModel>(() => JsonConvert.DeserializeObject<SettingViewModel>(File.ReadAllText("setting.json")));
 
             Logger.AddLog("Application Started");
@@ -44,7 +47,13 @@ namespace DualSub.ViewModel
                 return ServiceLocator.Current.GetInstance<LoggerViewModel>();
             }
         }
-
+        public PlexExplorerViewModel PlexExplorerViewModel
+        {
+            get
+            {
+                return ServiceLocator.Current.GetInstance<PlexExplorerViewModel>();
+            }
+        }
         public static void Cleanup()
         {
 

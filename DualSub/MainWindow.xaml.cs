@@ -34,8 +34,10 @@ namespace DualSub
             {
                 try {
                     var file = ((string[])e.Data.GetData(DataFormats.FileDrop)).First();
-                    var filePath = Path.Combine(Path.GetDirectoryName(file), Path.GetFileNameWithoutExtension(file)) + ".ass";
-                    File.Copy(@"temp\converted.ass", filePath);
+                    var filePath = Path.Combine(Path.GetDirectoryName(file), Path.GetFileNameWithoutExtension(file));
+                    File.Copy(@"temp\converted.ass", filePath + ".ass", true);
+                    File.Copy(@"temp\top.srt", filePath + ".en.srt", true);
+                    File.Copy(@"temp\bottom.srt", filePath + ".vi.srt", true);
                     ServiceLocator.Current.GetInstance<LoggerViewModel>().AddLog("Copied: "+ filePath);
                 }
                 catch (Exception ex)
@@ -53,6 +55,11 @@ namespace DualSub
                 mainViewModel.Title = Path.GetFileNameWithoutExtension(file);
                 mainViewModel.FileFilm = file;
             }
+        }
+
+        private void OpenPlex_Click(object sender, RoutedEventArgs e)
+        {
+            new FilmExplorer().Show();
         }
     }
 }

@@ -15,6 +15,11 @@
          FontFamily="{DynamicResource MaterialDesignFont}"
         mc:Ignorable="d"
         Title="Subsence Dual" Height="650" Width="1200">
+    <Controls:MetroWindow.RightWindowCommands>
+        <Controls:WindowCommands>
+            <Button Content="Explorer Plex" Click="OpenPlex_Click" />
+        </Controls:WindowCommands>
+    </Controls:MetroWindow.RightWindowCommands>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -69,6 +74,10 @@
                              materialDesign:HintAssist.Hint="Enter title"
                              Text="{Binding Title, Mode=TwoWay}"
                              />
+                    <TextBox Margin="0,10,0,0"
+                             materialDesign:HintAssist.Hint="Enter year"
+                             Text="{Binding Year, Mode=TwoWay}"
+                    />
                     <Button Width="150" Content="Search Now" HorizontalAlignment="Left" Margin="0,10,0,0"
                             Command="{Binding SearchCommand}" CommandParameter="{Binding Title}"/>
                 </StackPanel>
