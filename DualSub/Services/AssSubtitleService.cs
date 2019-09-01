@@ -60,7 +60,7 @@ namespace DualSub.Services
 
                 builder.AppendLine(string.Join("\r\n", allSubtitle));
 
-                File.WriteAllText(@"temp\" + title + ".ass", builder.ToString());
+                //File.WriteAllText(@"temp\" + title + ".ass", builder.ToString());
                 File.WriteAllText(@"temp\converted.ass", builder.ToString());
             }
             catch (Exception ex)

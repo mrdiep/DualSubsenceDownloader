@@ -1,10 +1,14 @@
+using CommonServiceLocator;
 using DualSub.Models;
 using DualSub.Services;
 using GalaSoft.MvvmLight;
 using GalaSoft.MvvmLight.Command;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows.Input;
 
@@ -51,10 +55,12 @@ namespace DualSub.ViewModel
             }
         }
 
-        public string Year {
+        public string Year
+        {
             get => _year;
             set => Set(ref _year, value);
         }
+        public PlexData CurrentPlexData { get => currentPlexData; set => Set(ref currentPlexData, value); }
 
         private void FilterNow()
         {
@@ -107,12 +113,59 @@ namespace DualSub.ViewModel
         }
 
 
-        public ICommand SearchCommand { get => searchCommand ?? (searchCommand = new RelayCommand<string>(async (x) => await SearchCommandImplment((string)x))); }
+        public ICommand SearchCommand { get => searchCommand ?? (searchCommand = new RelayCommand(async () => await SearchCommandImplment())); }
         public ICommand GetSubtitleListCommand { get => getSubtitleListCommand ?? (getSubtitleListCommand = new RelayCommand<FilmMetadata>(async x => await GetSubtitleListCommandImplement(x))); }
         public ICommand ConvertToDualSubtitleCommand { get => convertToDualSubtitleCommand ?? (convertToDualSubtitleCommand = new RelayCommand<object>(async x => await ConvertToDualSubtitleCommandImplement(x))); }
         public string FileFilm { get => fileFilm; set => Set(ref fileFilm, value); }
+        public ICommand DownloadDualSubCommand { get => downloadDualSubCommand ?? (downloadDualSubCommand = new RelayCommand<PlexData>(async x => await DownloadDualSubCommandImplementation(x))); }
+        public ICommand TestVLCDisplayDuaSubCommand { get => testVLCDisplayDuaSubCommand ?? (testVLCDisplayDuaSubCommand = new RelayCommand<PlexData>(async x => await TestVLCDisplayDuaSubCommandImplementation(x))); }
 
+        private ICommand testVLCDisplayDuaSubCommand;
+        private async Task DownloadDualSubCommandImplementation(PlexData x)
+        {
+            Title = x.Title;
+            Year = x.Year;
+            CurrentPlexData = x;
+            await SearchCommandImplment();
 
+            if (Films.Any())
+            {
+                await GetSubtitleListCommandImplement(Films.First());
+            }
+        }
+        private async Task TestVLCDisplayDuaSubCommandImplementation(PlexData x)
+        {
+            try
+            {
+                x = CurrentPlexData;
+                var q = "\"";
+                var sub = Path.Combine(Path.GetDirectoryName(Assembly.GetEntryAssembly().Location), @"temp\converted.ass");
+                var pName = $@"C:\Program Files (x86)\VideoLAN\VLC\vlc.exe {q}{x.File}{q} --sub-file={q}{sub}{q}";
+                Logger.AddLog(pName);
+                Process.Start(new ProcessStartInfo {
+                    FileName = @"C:\Program Files (x86)\VideoLAN\VLC\vlc.exe",
+                    Arguments = $@"{q}{x.File}{q} --sub-file={q}{sub}{q}"
+                });
+            }
+            catch (Exception ex)
+            {
+                Logger.AddError(ex.Message);
+            }
+        }
+        private ICommand downloadDualSubCommand;
+        private PlexData currentPlexData;
+
+        public ICommand SaveToLocalCommand { get => saveToLocalCommand ?? (saveToLocalCommand = new RelayCommand(SaveToLocal)); }
+        private ICommand saveToLocalCommand;
+        public void SaveToLocal()
+        {
+            var file = CurrentPlexData.File;
+            var filePath = Path.Combine(Path.GetDirectoryName(file), Path.GetFileNameWithoutExtension(file));
+            File.Copy(@"temp\converted.ass", filePath + ".ass", true);
+            File.Copy(@"temp\top.srt", filePath + ".en.srt", true);
+            File.Copy(@"temp\bottom.srt", filePath + ".vi.srt", true);
+            Logger.AddLog("Copied: " + filePath);
+        }
 
         private async Task ConvertToDualSubtitleCommandImplement(object x)
         {
@@ -172,7 +225,7 @@ namespace DualSub.ViewModel
         }
 
 
-        private async Task SearchCommandImplment(string title)
+        private async Task SearchCommandImplment()
         {
             Logger.AddLog("Start search film" + title);
 
@@ -181,7 +234,7 @@ namespace DualSub.ViewModel
             TopSubtitles = Enumerable.Empty<SubtitleMetadata>();
             BottomSubtitles = Enumerable.Empty<SubtitleMetadata>();
 
-            Films = (await SubsenceService.SearchFilms(title)).Where(x => string.IsNullOrWhiteSpace(Year) || x.Title.Contains(Year));
+            Films = (await SubsenceService.SearchFilms(Title)).Where(x => string.IsNullOrWhiteSpace(Year) || x.Title.Contains(Year));
             Logger.AddLog("Complete search film" + title);
         }
     }

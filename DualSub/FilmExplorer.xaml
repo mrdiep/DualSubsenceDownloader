@@ -18,6 +18,7 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         <Grid>
@@ -38,25 +39,33 @@
                 <TextBox Margin="5,10,5,5"
                         materialDesign:HintAssist.Hint="Enter plex token"
                         Text="{Binding PlexToken, Mode=TwoWay}"
-               />
+                 />
             </StackPanel>
             <StackPanel Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center">
                 <Button Command="{Binding BeginScanCommand}" Visibility="{Binding IsScaning, Converter={StaticResource TrueBoolToCollapsedConverter}}" >Begin Scan</Button>
              </StackPanel>
         </Grid>
-       
-        <ScrollViewer Grid.Row="1" >
+        <StackPanel Grid.Row="1" Orientation="Horizontal">
+            <TextBox materialDesign:HintAssist.Hint="Filter"
+                        Text="{Binding Filter, Mode=TwoWay}"/>
+        </StackPanel>
+        <ScrollViewer Grid.Row="2" >
             <ItemsControl ItemsSource="{Binding PlexItems}">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <StackPanel Margin="3">
-                            <StackPanel Orientation="Horizontal" >
+                        <StackPanel Margin="3" Background="#22808080" >
+                            <StackPanel Orientation="Horizontal" Margin="5" >
                                 <TextBlock Text="{Binding Title}"/>
                                 <TextBlock Margin="5,0,0,0" Text="{Binding Year}" Foreground="#FF494949"/>
                                 <TextBlock Margin="5,0,0,0" Visibility="{Binding HasDualSub, Converter={StaticResource TrueBoolToVisibleConverter}}" Text="DUAL-SUB" Foreground="#FF046108" FontWeight="Bold"/>
                             </StackPanel>
-                            <TextBlock Text="{Binding File}"/>
-                        </StackPanel>
+                            <TextBlock Text="{Binding File}" FontStyle="Italic" FontSize="11"  Margin="5"/>
+                            <StackPanel Orientation="Horizontal" Margin="5" >
+                                <Button Style="{StaticResource MaterialDesignFlatButton}" Command="{Binding Main.DownloadDualSubCommand, Source={StaticResource Locator}}" CommandParameter="{Binding}" Content="Download Dual-Sub" HorizontalAlignment="Left"/>
+                                <Button Style="{StaticResource MaterialDesignFlatButton}" Click="OpenFolder"  Content="Open Folder" HorizontalAlignment="Left"/>
+
+                            </StackPanel>
+                            </StackPanel>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>

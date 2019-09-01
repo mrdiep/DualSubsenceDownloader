@@ -79,7 +79,7 @@
                              Text="{Binding Year, Mode=TwoWay}"
                     />
                     <Button Width="150" Content="Search Now" HorizontalAlignment="Left" Margin="0,10,0,0"
-                            Command="{Binding SearchCommand}" CommandParameter="{Binding Title}"/>
+                            Command="{Binding SearchCommand}" />
                 </StackPanel>
                 <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Auto">
                     <ItemsControl ItemsSource="{Binding Films}">
@@ -212,6 +212,9 @@
                                         Drop="FilmFile_Drop" Width="250" Height="120" BorderBrush="#551D1B1B" BorderThickness="1">
                                 <TextBlock Text="{Binding CreateSubtitleStatus}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
                             </Border>
+
+                            <Button Content="Test VLC sub" Command="{Binding TestVLCDisplayDuaSubCommand}"/>
+                            <Button Content="Save Plex Sub" Command="{Binding SaveToLocalCommand}"/>
                         </StackPanel>
                     </StackPanel>
                 </ScrollViewer>

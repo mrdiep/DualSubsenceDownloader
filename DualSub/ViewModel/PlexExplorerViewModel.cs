@@ -5,6 +5,7 @@ using GalaSoft.MvvmLight.Command;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -17,6 +18,8 @@ namespace DualSub.ViewModel
         private readonly PlexXmlService service;
         private readonly SettingViewModel setting;
         private readonly LoggerViewModel logger;
+        private List<PlexData> movies;
+
         public ObservableCollection<PlexData> PlexItems { get; private set; } = new ObservableCollection<PlexData>();
         public PlexExplorerViewModel(PlexXmlService service, PlexDataMapperService mapperService, SettingViewModel setting, LoggerViewModel logger)
         {
@@ -27,12 +30,21 @@ namespace DualSub.ViewModel
         }
 
         public bool IsScaning { get => _isScaning; set => Set(ref _isScaning, value); }
-
+        public string Filter
+        {
+            get => filter; set
+            {
+                Set(ref filter, value);
+                PlexItems = new ObservableCollection<PlexData>(movies.Where(x => string.IsNullOrWhiteSpace(Filter) || Path.GetFileName(x.File).ToLower().Contains(Filter.ToLower())));
+                RaisePropertyChanged("PlexItems");
+            }
+        }
         public ICommand BeginScanCommand { get => beginScanCommand ?? new RelayCommand(async () => await BeginScanCommandImplement()); }
         public PlexDataMapperService MapperService { get; }
 
         private ICommand beginScanCommand;
         private bool _isScaning;
+        private string filter;
 
         private async Task BeginScanCommandImplement()
         {
@@ -40,15 +52,16 @@ namespace DualSub.ViewModel
             try
             {
                 PlexItems.Clear();
-                var movies = await service.GetAll(setting.PlexServer, setting.LibrarySection, setting.PlexToken);
-                PlexItems = new ObservableCollection<PlexData>(movies);
-                foreach(var plexItem in PlexItems)
+                movies = await service.GetAll(setting.PlexServer, setting.LibrarySection, setting.PlexToken);
+                foreach (var plexItem in movies)
                 {
                     MapperService.AddChecking(plexItem);
                 }
+
+                PlexItems = new ObservableCollection<PlexData>(movies.Where(x => string.IsNullOrWhiteSpace(Filter) || Path.GetFileName(x.File).ToLower().Contains(Filter.ToLower())));
                 RaisePropertyChanged("PlexItems");
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 logger.AddLog(ex.Message);
             }

@@ -29,13 +29,17 @@ namespace DualSub.Services
         {
             var data = new List<PlexData>();
             var notify = string.Empty;
+            var path = $@"{serverId}/library/sections/{section}/all?X-Plex-Token={token}";
+            Dispatcher.CurrentDispatcher.Invoke(() => {
+                Logger.AddLog("Request: " + path);
+            });
             await Task.Factory.StartNew(() =>
             {
                 try
                 {
                     XmlDocument xmlDoc = new XmlDocument();
-                    xmlDoc.Load(
-                        $@"{serverId}/library/sections/{section}/all?X-Plex-Token={token}");
+                    
+                    xmlDoc.Load(path);
 
                     var videoNodes = xmlDoc.SelectNodes("//MediaContainer/Video");
                     foreach (var videoNode in videoNodes)
@@ -49,10 +53,12 @@ namespace DualSub.Services
                         {
                             Title = xmlNode.Attributes["title"]?.Value,
                             Year = xmlNode.Attributes["year"]?.Value,
+                            AddedAt = long.Parse(xmlNode.Attributes["addedAt"]?.Value),
                             File = filePath
                         });
                     }
 
+                    data = data.Where(x => x.File.Contains("Films")).OrderByDescending(x => x.AddedAt).ToList();
                     notify = "Found : " + data.Count + " movies";
                 }
                 catch (Exception ex)
@@ -66,6 +72,9 @@ namespace DualSub.Services
             Dispatcher.CurrentDispatcher.Invoke(() => {
                 Logger.AddLog(notify);
             });
+
+            
+
             return data;
         }
     }

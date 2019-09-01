@@ -22,11 +22,10 @@ namespace DualSub.Services
         
         public void AddChecking(PlexData data)
         {
+            data.File = data.File.Replace(@"\mnt\library", @"\\raspberrypi\HDD");
+            data.File = data.File.Replace(@"/mnt/library", @"\\raspberrypi\HDD");
             var folder = Path.GetDirectoryName(data.File);
             var file = Path.GetFileNameWithoutExtension(data.File);
-
-            folder = folder.Replace(@"\mnt\library", @"\\raspberrypi\HDD");
-
             if (File.Exists(Path.Combine(folder, file + ".ass")))
             {
                 data.HasDualSub = true;

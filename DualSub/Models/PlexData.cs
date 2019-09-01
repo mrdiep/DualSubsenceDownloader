@@ -11,7 +11,7 @@ namespace DualSub.Models
         public string Title { get; set; }
         public string Year { get; set; }
         public string File { get; set; }
-
+        public long AddedAt { get; set; }
         public bool HasDualSub { get; set; }
     }
 }
