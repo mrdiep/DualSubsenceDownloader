@@ -18,7 +18,8 @@ namespace DualSub.ViewModel
     {
         public SubsenceService SubsenceService { get; }
         public LoggerViewModel Logger { get; }
-        public AssSubtitleService AssSubtitleService { get; }
+        public IGenerateSubtitleService GenerateSrtSubtitleService { get; }
+        public IGenerateSubtitleService GenerateAssSubtitleService { get; }
         public SettingViewModel Setting { get; }
 
         private string title = "The incredibles 1";
@@ -37,11 +38,17 @@ namespace DualSub.ViewModel
         private string fileFilm;
         private string _year = "2004";
 
-        public MainViewModel(SubsenceService subsenceService, LoggerViewModel loggerViewModel, AssSubtitleService assSubtitleService, SettingViewModel settingViewModel)
+        public MainViewModel(
+            SubsenceService subsenceService,
+            LoggerViewModel loggerViewModel,
+            DualSrtSubtitleService dualSrtSubtitleService,
+            AssSubtitleService assSubtitleService,
+            SettingViewModel settingViewModel)
         {
             SubsenceService = subsenceService;
             Logger = loggerViewModel;
-            AssSubtitleService = assSubtitleService;
+            GenerateSrtSubtitleService = dualSrtSubtitleService;
+            GenerateAssSubtitleService = assSubtitleService; 
             Setting = settingViewModel;
             Setting.SubcribeChanged((x) => FilterNow());
 
@@ -161,9 +168,10 @@ namespace DualSub.ViewModel
         {
             var file = CurrentPlexData.File;
             var filePath = Path.Combine(Path.GetDirectoryName(file), Path.GetFileNameWithoutExtension(file));
+            File.Copy(@"temp\converted.srt", filePath + ".vi.srt", true);
             File.Copy(@"temp\converted.ass", filePath + ".ass", true);
             File.Copy(@"temp\top.srt", filePath + ".en.srt", true);
-            File.Copy(@"temp\bottom.srt", filePath + ".vi.srt", true);
+            //File.Copy(@"temp\bottom.srt", filePath + ".vi.srt", true);
             Logger.AddLog("Copied: " + filePath);
         }
 
@@ -188,7 +196,9 @@ namespace DualSub.ViewModel
 
                 Logger.AddLog("Start create subtitle from 2 list");
                 CreateSubtitleStatus = "merging 2 subtitles...";
-                AssSubtitleService.CreateDualSub(topContent, bottomContent, Title, Setting);
+                GenerateAssSubtitleService.CreateDualSub(topContent, bottomContent, Title, Setting);
+                GenerateSrtSubtitleService.CreateDualSub(topContent, bottomContent, Title, Setting);
+
                 Logger.AddLog("Complete Convert");
                 CreateSubtitleStatus = "Merging completed. \r\nDrop film here to get merged subtitle.";
             }

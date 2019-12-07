@@ -267,7 +267,9 @@
     <Compile Include="Models\FilmMetadata.cs" />
     <Compile Include="Models\PlexData.cs" />
     <Compile Include="Models\SubtitleItem.cs" />
+    <Compile Include="Services\DualSrtSubtitleService.cs" />
     <Compile Include="Services\AssSubtitleService.cs" />
+    <Compile Include="Services\IAssSubtitleService.cs" />
     <Compile Include="Services\PlexXmlService.cs" />
     <Compile Include="Services\SubsenceService.cs" />
     <Compile Include="Models\SubtitleMetadata.cs" />

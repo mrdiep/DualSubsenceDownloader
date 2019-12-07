@@ -17,6 +17,8 @@ namespace DualSub.ViewModel
             SimpleIoc.Default.Register<LoggerViewModel>();
             SimpleIoc.Default.Register<SubsenceService>();
             SimpleIoc.Default.Register<AssSubtitleService>();
+            SimpleIoc.Default.Register<DualSrtSubtitleService>();
+
             SimpleIoc.Default.Register<PlexDataMapperService>();
             SimpleIoc.Default.Register<PlexXmlService>();
             SimpleIoc.Default.Register<PlexExplorerViewModel>();

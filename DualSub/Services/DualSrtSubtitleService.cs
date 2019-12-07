@@ -9,11 +9,11 @@ using System.Text;
 
 namespace DualSub.Services
 {
-    public class AssSubtitleService : IGenerateSubtitleService
+    public class DualSrtSubtitleService: IGenerateSubtitleService
     {
         public LoggerViewModel Logger { get; }
 
-        public AssSubtitleService(LoggerViewModel logger)
+        public DualSrtSubtitleService(LoggerViewModel logger)
         {
             Logger = logger;
         }
@@ -33,13 +33,6 @@ namespace DualSub.Services
         {
             try
             {
-                var template = File.ReadAllText(@"temp\ASS-TEMPLATE.txt")
-                    .Replace("TopFontsize", settingViewModel.TopFontSize)
-                    .Replace("TopPrimaryColour", settingViewModel.TopFontColor)
-                    .Replace("TopOutlineColour", settingViewModel.TopFontColorOutline)
-                    .Replace("BotFontsize", settingViewModel.TopFontSize)
-                    .Replace("BotPrimaryColour", settingViewModel.BottomFontColor)
-                    .Replace("BotOutlineColour", settingViewModel.BottomFontColorOutline);
 
                 var allSubtitle = topContent.Select(x => new DualSubtitleItem
                 {
@@ -53,15 +46,17 @@ namespace DualSub.Services
                     StartTime = x.StartTime,
                     Lines = x.Lines,
                     PositionAt = DualSubtitleItem.Position.Bot
-                })).OrderBy(x => x.StartTime)
-                .Select(x => $@"Dialogue: 0," + FormarTime(x.StartTime) + "," + FormarTime(x.EndTime) + "," + x.PositionAt.ToString() + ",,0000,0000,0000,," + string.Join("\\N", x.Lines.Select(RemoveHtml)));
+                }))
+                .OrderBy(x => x.StartTime).ToList();
 
-                StringBuilder builder = new StringBuilder(template);
+                var allSubtitle2 = allSubtitle.Select(x => (allSubtitle.IndexOf(x) + 1) + "\r\n" + FormarTime(x.StartTime) + "  --> " + FormarTime(x.EndTime) + "\r\n" + $"<font {(x.PositionAt==DualSubtitleItem.Position.Top ? " size=\"9px\" " : "")} color=\"#{(x.PositionAt == DualSubtitleItem.Position.Bot ? "F46B41" : "ffffff")}\">" + string.Join(" ", x.Lines.Select(RemoveHtml)) + "</font>\r\n");
 
-                builder.AppendLine(string.Join("\r\n", allSubtitle));
+                StringBuilder builder = new StringBuilder();
+
+                builder.AppendLine(string.Join("\r\n", allSubtitle2));
 
                 //File.WriteAllText(@"temp\" + title + ".ass", builder.ToString());
-                File.WriteAllText(@"temp\converted.ass", builder.ToString());
+                File.WriteAllText(@"temp\converted.srt", builder.ToString());
             }
             catch (Exception ex)
             {
@@ -69,7 +64,7 @@ namespace DualSub.Services
             }
         }
 
-        private static string FormarTime(int time) => TimeSpan.FromMilliseconds(time).ToString(@"hh\:mm\:ss\.ff");
+        private static string FormarTime(int time) =>  TimeSpan.FromMilliseconds(time).ToString(@"hh\:mm\:ss\,ff");
 
         private string RemoveHtml(string arg)
         {
@@ -80,7 +75,7 @@ namespace DualSub.Services
 
             var document = new HtmlDocument();
             document.LoadHtml(arg);
-            return string.Join("\\N", document.DocumentNode.InnerText.Split(new[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries));
+            return string.Join("\\N" , document.DocumentNode.InnerText.Split(new[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries));
         }
     }
 }
