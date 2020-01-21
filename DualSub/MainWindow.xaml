@@ -1,0 +1,224 @@
+﻿<Controls:MetroWindow x:Class="DualSub.MainWindow"
+        xmlns:Controls="http://metro.mahapps.com/winfx/xaml/controls"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+         TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+         TextElement.FontWeight="Regular"
+         TextElement.FontSize="13"
+         TextOptions.TextFormattingMode="Ideal"
+         TextOptions.TextRenderingMode="Auto"
+         DataContext="{Binding Source={StaticResource Locator}, Path=Main}"
+         Background="{DynamicResource MaterialDesignPaper}"
+         FontFamily="{DynamicResource MaterialDesignFont}"
+        mc:Ignorable="d"
+        Title="Subsence Dual" Height="650" Width="1200">
+    <Controls:MetroWindow.RightWindowCommands>
+        <Controls:WindowCommands>
+            <Button Content="Explorer Plex" Click="OpenPlex_Click" />
+        </Controls:WindowCommands>
+    </Controls:MetroWindow.RightWindowCommands>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="6"/>
+            <ColumnDefinition Width="350"/>
+        </Grid.ColumnDefinitions>
+        <GridSplitter Grid.Column="1" Width="6" HorizontalAlignment="Stretch" Grid.RowSpan="2" Background="{x:Null}"></GridSplitter>
+        <materialDesign:Card Padding="20"  Grid.Column="2" Grid.RowSpan="3" VerticalAlignment="Stretch" >
+            <Grid DataContext="{Binding Source={StaticResource Locator}, Path=Logger}">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock Text="CONSOLE LOG (" Style="{StaticResource MaterialDesignSubheadingTextBlock}"/>
+                    <TextBlock Text="{Binding Logs.Count}" Style="{StaticResource MaterialDesignSubheadingTextBlock}"/>
+                    <TextBlock Text=")" Style="{StaticResource MaterialDesignSubheadingTextBlock}"/>
+                </StackPanel>
+
+                <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                    <ItemsControl  ItemsSource="{Binding Logs}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Margin="2" Background="{Binding Background}">
+                                    <TextBlock Text="{Binding LoggedAt}" Foreground="Gray" FontSize="11"/>
+                                    <TextBlock Padding="15,0,0,0" Text="{Binding Message}" TextWrapping="Wrap" FontSize="11"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+            </Grid>
+        </materialDesign:Card>
+
+        <materialDesign:Card Padding="32" Margin="10" Grid.ColumnSpan="2" MaxHeight="250">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="350"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel Orientation="Vertical"
+                            AllowDrop="True"
+                             Drop="FilmFileInfo_Drop">
+                    <TextBlock Style="{DynamicResource MaterialDesignTitleTextBlock}">Finder</TextBlock>
+                    <TextBlock Text="Enter title film or drag video here." Margin="0,15,0,0"/>
+                    <TextBox Margin="0,10,0,0"
+                             materialDesign:HintAssist.Hint="Enter title"
+                             Text="{Binding Title, Mode=TwoWay}"
+                             />
+                    <TextBox Margin="0,10,0,0"
+                             materialDesign:HintAssist.Hint="Enter year"
+                             Text="{Binding Year, Mode=TwoWay}"
+                    />
+                    <Button Width="150" Content="Search Now" HorizontalAlignment="Left" Margin="0,10,0,0"
+                            Command="{Binding SearchCommand}" />
+                </StackPanel>
+                <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Auto">
+                    <ItemsControl ItemsSource="{Binding Films}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal" Margin="2">
+                                    <Button Content="Select" Style="{StaticResource MaterialDesignFlatButton}" Command="{Binding Source={StaticResource Locator}, Path=Main.GetSubtitleListCommand}" CommandParameter="{Binding}"/>
+                                    <TextBlock Margin="10,0,0,0" VerticalAlignment="Center" Text="{Binding Title}"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+                <Border Grid.RowSpan="2" Grid.ColumnSpan="2" Background="#DDFFFFFF" Visibility="{Binding IsInCreateSubtitles, Converter={StaticResource TrueBoolToVisibleConverter}}">
+                    <TextBlock Text="User action is locked." HorizontalAlignment="Center" VerticalAlignment="Center"  Padding="20" Background="White" Foreground="Black"/>
+                </Border>
+            </Grid>
+
+        </materialDesign:Card>
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="350"/>
+            </Grid.ColumnDefinitions>
+
+            <materialDesign:Card VerticalAlignment="Stretch" Padding="10" Margin="10,0,10,10">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="6"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <GridSplitter Grid.Column="1" Grid.Row="1" Background="Gray"  Width="5" HorizontalAlignment="Stretch"/>
+                    <Grid Margin="5" Grid.ColumnSpan="3">
+                        <TextBox materialDesign:HintAssist.Hint="Enter Tags for searching" Text="{Binding Setting.TagsFilter, Mode=TwoWay, Source={StaticResource Locator}}"/>
+                    </Grid>
+                    <Grid Grid.Column="0" Grid.Row="1" Margin="3">
+                        <ComboBox IsSynchronizedWithCurrentItem="True" SelectedItem="{Binding FilterTopLanguage, Mode=TwoWay}" ItemsSource="{Binding Subtitles, Converter={StaticResource GetDistinctLanguageConverter}, ConverterParameter='ENGLISH'}" VerticalAlignment="Top" />
+
+                        <ListView ItemsSource="{Binding TopSubtitles}" x:Name="TopSubtitlesListView" Margin="0,30,0,0">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding Title}"/>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ListView>
+
+                        <TextBlock Text="No Subtitles" Visibility="{Binding TopSubtitles, Converter={StaticResource ListEmptyToVisibleConverter}}" 
+                                   HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Grid>
+                    <Grid Grid.Column="2" Grid.Row="1" Margin="3">
+                        <ComboBox 
+                                IsSynchronizedWithCurrentItem="True"
+                                SelectedItem="{Binding FilterBottomLanguage, Mode=TwoWay}"
+                                ItemsSource="{Binding Subtitles, Converter={StaticResource GetDistinctLanguageConverter}, ConverterParameter='VIETNAMESE'}"
+                                VerticalAlignment="Top" />
+                        <ListView ItemsSource="{Binding BottomSubtitles}" x:Name="BottomSubtitlesListView" Margin="0,30,0,0">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid>
+                                        <TextBlock Text="{Binding Title}"/>
+                                    </Grid>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ListView>
+                        <TextBlock Text="No Subtitles" Visibility="{Binding BottomSubtitles, Converter={StaticResource ListEmptyToVisibleConverter}}" 
+                                   HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Grid>
+                    <Border Background="#77FFFFFF" Grid.ColumnSpan="3" Grid.RowSpan="2" Visibility="{Binding IsInCreateSubtitles, Converter={StaticResource TrueBoolToVisibleConverter}}">
+                        <TextBlock Text="User action is locked." HorizontalAlignment="Center" VerticalAlignment="Center" Padding="20" Background="White" Foreground="Black"/>
+                    </Border>
+                </Grid>
+            </materialDesign:Card>
+            <materialDesign:Card VerticalContentAlignment="Center" Grid.Column="1" VerticalAlignment="Stretch" Margin="0,0,5,10" Padding="10">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="0,0,10,0">
+                    <StackPanel>
+                        <TextBlock Text="SELECTED TOP SUBTITLE" FontSize="10" Visibility="{Binding SelectedItem,ElementName=TopSubtitlesListView,Converter={StaticResource NullToCollapsedConverter}}"/>
+                        <TextBlock TextWrapping="Wrap" FontWeight="Bold" Text="{Binding SelectedItem.Title,ElementName=TopSubtitlesListView}"/>
+                        <TextBlock Text="SELECTED BOTTOM SUBTITLE" FontSize="10" Margin="0,5,0,0" Visibility="{Binding SelectedItem,ElementName=TopSubtitlesListView,Converter={StaticResource NullToCollapsedConverter}}"/>
+                        <TextBlock TextWrapping="Wrap" FontWeight="Bold" Text="{Binding SelectedItem.Title,ElementName=BottomSubtitlesListView}"/>
+
+                        <StackPanel>
+                            <StackPanel.Visibility>
+                                <MultiBinding Converter="{StaticResource AllNotNullToVisibilityConverter}">
+                                    <Binding Path="SelectedItem" ElementName="TopSubtitlesListView"/>
+                                    <Binding Path="SelectedItem" ElementName="BottomSubtitlesListView"/>
+                                </MultiBinding>
+                            </StackPanel.Visibility>
+                            <Expander Background="{x:Null}" Header="Font Settings" IsExpanded="False">
+                                <StackPanel DataContext="{Binding Source={StaticResource Locator}, Path=Setting}">
+                                    <TextBlock Text="TOP FONT SETTINGS"  Margin="0,5,0,0" FontWeight="Bold"/>
+                                    <StackPanel Margin="15,0,0,0">
+                                        <TextBlock Text="Size" FontStyle="Italic" FontSize="12" Margin="0,3,0,0"/>
+                                        <TextBox Text="{Binding TopFontSize, Mode=TwoWay}"/>
+                                        <TextBlock Text="Color" FontStyle="Italic" FontSize="12" Margin="0,3,0,0"/>
+                                        <TextBox Text="{Binding TopFontColor, Mode=TwoWay}"/>
+                                        <TextBlock Text="Outline" FontStyle="Italic" FontSize="12" Margin="0,3,0,0"/>
+                                        <TextBox Text="{Binding TopFontColorOutline, Mode=TwoWay}"/>
+                                    </StackPanel>
+                                    <TextBlock Text="BOTTOM FONT SETTINGS" FontWeight="Bold" Margin="0,5,0,0"/>
+                                    <StackPanel Margin="15,0,0,0">
+                                        <TextBlock Text="Size" FontStyle="Italic" FontSize="12" Margin="0,3,0,0"/>
+                                        <TextBox Text="{Binding BottomFontSize, Mode=TwoWay}"/>
+                                        <TextBlock Text="Color" FontStyle="Italic" FontSize="12" Margin="0,3,0,0"/>
+                                        <TextBox Text="{Binding BottomFontColor, Mode=TwoWay}"/>
+                                        <TextBlock Text="Outline" FontStyle="Italic" FontSize="12" Margin="0,3,0,0"/>
+                                        <TextBox Text="{Binding BottomFontColorOutline, Mode=TwoWay}"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Expander>
+                            <Button  AllowDrop="True"
+                                     Visibility="{Binding IsInCreateSubtitles, Converter={StaticResource TrueBoolToCollapsedConverter}}" 
+                                     Content="Convert Now" Width="150"  Margin="0,10,0,0" Command="{Binding ConvertToDualSubtitleCommand}">
+                                <Button.CommandParameter>
+                                    <MultiBinding Converter="{StaticResource MultiValueConverter}">
+                                        <Binding Path="SelectedItem" ElementName="TopSubtitlesListView"/>
+                                        <Binding Path="SelectedItem" ElementName="BottomSubtitlesListView"/>
+                                    </MultiBinding>
+                                </Button.CommandParameter>
+                            </Button>
+
+                            <Border Margin="5,15,5,5" 
+                                        AllowDrop="True"
+                                        Drop="FilmFile_Drop" Width="250" Height="120" BorderBrush="#551D1B1B" BorderThickness="1">
+                                <TextBlock Text="{Binding CreateSubtitleStatus}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+
+                            <Button Content="Test VLC sub" Command="{Binding TestVLCDisplayDuaSubCommand}"/>
+                            <Button Content="Save Plex Sub" Command="{Binding SaveToLocalCommand}"/>
+                        </StackPanel>
+                    </StackPanel>
+                </ScrollViewer>
+            </materialDesign:Card>
+        </Grid>
+    </Grid>
+</Controls:MetroWindow>
